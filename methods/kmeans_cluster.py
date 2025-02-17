@@ -14,7 +14,6 @@ def build_feature_matrix(user_pair_matrix_in: np.ndarray) -> np.ndarray:
     sum_k_neg = mask_neg.sum(axis=1)
     sum_k_pos = mask_pos.sum(axis=1)
 
-    # 组合各部分结果得到最终的特征矩阵
     feature_matrix = (sum_j_neg - sum_j_pos) + (sum_k_pos - sum_k_neg)
     return feature_matrix
 

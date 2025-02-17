@@ -1,18 +1,17 @@
 import csv
 import os
 from typing import Dict, List, Tuple
-
-import scipy
 import torch
 from sklearn.metrics import silhouette_score
 
 from cluster_interface import ClusterInterface
-from methods.KmeansCluster import KmeansCluster
+from methods.kmeans_cluster import KmeansCluster
 import pandas as pd
 import numpy as np
 import torch.optim as optim
 
 from bt_model import BTModel
+from methods.nmf_cluster import NMFCluster
 
 DataDict = Dict[str, int]
 
@@ -149,8 +148,12 @@ user_index, sample_index, user_pair_matrix = build_user_pair_matrix_from_raw_dat
 max_user_cnt, max_sample_cnt = get_max_num(user_index) - 1, get_max_num(sample_index) - 1
 print(f'Load {max_user_cnt} users and {max_sample_cnt} samples.')
 # all cluster methods
-cluster_methods: List[ClusterInterface] = [KmeansCluster(num_clusters=5, random_state=42),
-                                           KmeansCluster(num_clusters=7, random_state=42), ]
+rand_seed = 42
+cluster_methods: List[ClusterInterface] = [
+    # KmeansCluster(num_clusters=5, random_state=42),
+    # KmeansCluster(num_clusters=7, random_state=42),
+    NMFCluster(num_clusters=5, random_state=rand_seed, num_features=12),
+]
 
 for i, method in enumerate(cluster_methods):
     print(f"{i + 1}.Start {method.get_name()} clustering, target cluster count: {method.get_num_clusters()}")
