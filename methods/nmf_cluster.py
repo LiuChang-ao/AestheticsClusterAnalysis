@@ -10,6 +10,7 @@ from cluster_interface import ClusterInterface
 
 class NMFCluster(ClusterInterface):
     def __init__(self, num_clusters=5, random_state=42, num_features=10):
+        super().__init__()
         self.name = "NMFCluster"
         self.num_clusters = num_clusters
         self.random_state = random_state
@@ -33,8 +34,8 @@ class NMFCluster(ClusterInterface):
         nmf = NMF(
             n_components=self.num_features,
             random_state=self.random_state,
-            solver='mu',
-            init='nndsvda'
+            solver='cd',
+            init='nndsvd'
         )
         user_features = nmf.fit_transform(data_matrix)
 

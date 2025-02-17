@@ -20,6 +20,7 @@ def build_feature_matrix(user_pair_matrix_in: np.ndarray) -> np.ndarray:
 
 class KmeansCluster(ClusterInterface):
     def __init__(self, num_clusters=5, random_state=42):
+        super().__init__()
         self.name = "KmeansCluster"
         self.num_clusters = num_clusters
         self.random_state = random_state

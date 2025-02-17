@@ -5,6 +5,9 @@ import numpy as np
 
 
 class ClusterInterface(ABC):
+    def __init__(self):
+        self.idx = None
+
     @abstractmethod
     # input:[user,sample_left,sample_right]->result(-1 for left,1 for right)
     # output:[user] -> group_id ; [user] -> features

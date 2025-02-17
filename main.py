@@ -5,13 +5,12 @@ import torch
 from sklearn.metrics import silhouette_score
 
 from cluster_interface import ClusterInterface
-from methods.kmeans_cluster import KmeansCluster
 import pandas as pd
 import numpy as np
 import torch.optim as optim
 
 from bt_model import BTModel
-from methods.nmf_cluster import NMFCluster
+from methods.self_encoder_cluster import SelfEncoderCluster
 
 DataDict = Dict[str, int]
 
@@ -130,7 +129,7 @@ def calculate_strength_values(clusters_in: np.ndarray, user_pair_matrix_in: np.n
             loss.backward()
             optimizer.step()
             tot_loss += loss.item()
-        if iteration % 5 == 0: print(f"Epoch {iteration}, Loss: {tot_loss}")
+        if iteration % 5 == 0: print(f"MLE Epoch {iteration}, Loss: {tot_loss}")
 
     strength_array = model.reward.detach().cpu().numpy()
     result = {}
@@ -152,11 +151,15 @@ rand_seed = 42
 cluster_methods: List[ClusterInterface] = [
     # KmeansCluster(num_clusters=5, random_state=42),
     # KmeansCluster(num_clusters=7, random_state=42),
-    NMFCluster(num_clusters=5, random_state=rand_seed, num_features=12),
+    # NMFCluster(num_clusters=7, random_state=rand_seed, num_features=4),
+    SelfEncoderCluster(num_clusters=7, random_state=rand_seed, num_features=128, idx=6),
 ]
 
 for i, method in enumerate(cluster_methods):
-    print(f"{i + 1}.Start {method.get_name()} clustering, target cluster count: {method.get_num_clusters()}")
+    tag = i + 1
+    if method.idx is not None:
+        tag = method.idx
+    print(f"{tag}.Start {method.get_name()} clustering, target cluster count: {method.get_num_clusters()}")
     cluster_result, feature_matrix = method.cluster(user_pair_matrix)
     cluster_result_2d = [np.where(cluster_result == s)[0] for s in range(method.get_num_clusters())]
     for idx, cluster in enumerate(cluster_result_2d):
@@ -164,7 +167,8 @@ for i, method in enumerate(cluster_methods):
     sil_score = silhouette_score(feature_matrix, cluster_result)
     print(f'Silhouette Score: {sil_score}')
     for cluster_idx, cluster in enumerate(cluster_result_2d):
-        file_name = f'Method_{i + 1}_{method.get_name()}_Cluster_{cluster_idx}.csv'
+
+        file_name = f'Method_{tag}_{method.get_name()}_Cluster_{cluster_idx}.csv'
         file_path = os.path.join(output_path_prefix, file_name)
         strength_values = calculate_strength_values(cluster, user_pair_matrix)
         with open(file_path, mode='w', newline='') as file:
